@@ -7,7 +7,7 @@ let conn = require('../Dbconnection.js');
 
 //sanpham
 router.get('/sanpham', function (req, res) {
-    conn.query("SELECT dausach.*, theloai.* FROM dausach, theloai WHERE dausach.MATHELOAI = theloai.MATHELOAI ORDER BY dausach.MASACH DESC", function (err, result, fields) {
+    conn.query("SELECT dausach.*, ct_gia.* FROM dausach, ct_gia WHERE dausach.MASACH = ct_gia.MASACH ORDER BY dausach.MASACH DESC", function (err, result, fields) {
         if (err) throw err;
         res.json(result);
     });
