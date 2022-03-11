@@ -31,11 +31,12 @@ router.get('/spbanchay', function (req, res) {
 router.get('/sanpham/:MASACH', function (req, res, next) {
     let id = req.params.MASACH;
     if (id) {
-      let query_string = "SELECT ds.MASACH, ds.TENSACH, ds.SOTRANG, ds.SOLUONG, ds.NAMXB, ds.MATHELOAI, ds.HINH1, tg.TEN, gia.GIATHAYDOI, tl.TENTHELOAI, st.MOTA FROM dausach ds ";
+      let query_string = "SELECT ds.MASACH, ds.TENSACH, ds.SOTRANG, ds.SOLUONG, ds.NAMXB, nxb.TENNXB, ds.MATHELOAI, ds.HINH1, tg.TEN, gia.GIATHAYDOI, tl.TENTHELOAI, st.MOTA FROM dausach ds ";
         query_string += " LEFT JOIN ct_gia gia ON gia.MASACH = ds.MASACH ";
         query_string += " LEFT JOIN ct_sangtac  st on st.MASACH = ds.MASACH"
         query_string +=" LEFT JOIN tacgia tg on st.MATG = st.MATG "
         query_string +=" LEFT JOIN theloai tl on tl.MATHELOAI = ds.MATHELOAI"
+        query_string +=" LEFT JOIN nhaxuatban nxb on nxb.MANXB = ds.MANXB"
         query_string += ` WHERE ds.MASACH = '${id}'` 
         conn.query(query_string, function (err, result, fields) {
             if (err) throw err;
