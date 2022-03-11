@@ -15,7 +15,7 @@ router.get('/sanpham', function (req, res) {
 
 // sanpham moi nhat
 router.get('/sanphammoi', function (req, res) {
-    conn.query("SELECT * FROM dausach ORDER BY dausach.MASACH DESC LIMIT 4 ", function (err, result, fields) {
+    conn.query("SELECT * FROM dausach, ct_gia ORDER BY dausach.MASACH = ct_gia.MASACH AND dausach.MASACH DESC LIMIT 4 ", function (err, result, fields) {
         if (err) throw err;
         res.json(result);
     });
@@ -31,7 +31,7 @@ router.get('/spbanchay', function (req, res) {
 router.get('/sanpham/:MASACH', function (req, res, next) {
     let id = req.params.MASACH;
     if (id) {
-        query_string = "SELECT * FROM dausach WHERE MASACH=" + "'"+ id + "'";
+        query_string = "SELECT * FROM dausach, ct_gia, ct_sangtac, tacgia where dausach.MASACH = ct_gia.MASACH = ct_sangtac.MASACH AND ct_sangtac.MATG = tacgia.MATG AND dausach.MASACH=" + "'"+ id + "'";
         conn.query(query_string, function (err, result, fields) {
             if (err) throw err;
             var [sp]= result;
