@@ -207,25 +207,150 @@ router.delete("/taikhoan/:id", function (req, res) {
 //Đăng nhập
 router.post("/dangnhap", function (req, res, next) {
   let { EMAIL, PASSWORD } = req.body;
-  conn.query("SELECT EMAIL, PASSWORD, MANQ FROM khachhang WHERE EMAIL = ? AND PASSWORD = ?", [EMAIL, PASSWORD], function (err, result, fields) {
-    if (err) throw err;
-    if (result.length === 1) {
-      res.json(result);
-    } else {
-      conn.query(
-        "SELECT EMAIL, PASSWORD, MANQ FROM nhanvien WHERE EMAIL = ? AND PASSWORD = ?",
-        [EMAIL, PASSWORD],
-        function (errNext, resultNext, fieldsNext) {
-        if (errNext) throw errNext;
-          if (resultNext.length === 1) {              
-            res.json(resultNext);
-          } else {
-            return next(new ErrorResponse(404, `Wrong action`));
+  conn.query(
+    "SELECT EMAIL, PASSWORD, MANQ FROM khachhang WHERE EMAIL = ? AND PASSWORD = ?",
+    [EMAIL, PASSWORD],
+    function (err, result, fields) {
+      if (err) throw err;
+      if (result.length === 1) {
+        res.json(result);
+      } else {
+        conn.query(
+          "SELECT EMAIL, PASSWORD, MANQ FROM nhanvien WHERE EMAIL = ? AND PASSWORD = ?",
+          [EMAIL, PASSWORD],
+          function (errNext, resultNext, fieldsNext) {
+            if (errNext) throw errNext;
+            if (resultNext.length === 1) {
+              res.json(resultNext);
+            } else {
+              return next(new ErrorResponse(404, `Wrong action`));
+            }
           }
+        );
+      }
+    }
+  );
+});
+
+router.post("/taikhoan-nhanvien", function (req, res, next) {
+  let { HO, TEN, GIOITINH, NGAYSINH, SDT, EMAIL, DIACHI } = req.body;
+  const PASSWORD = "123456";
+  let MANV = "";
+  const MANQ = "q2";
+  if (!isEmail(EMAIL)) {
+    return res.json({ status: 400, message:"Vui lòng nhập email hợp lệ!!(abc@gmail.com)" });
+  } else if (!validatePhoneNumber(SDT)) {
+    return res.json({ status: 300 , message: "Vui lòng nhập số điện thoại hợp lệ!! "});
+  }
+  conn.query(
+    "select max(manv) as manv from nhanvien",
+    function (err, result, fields) {
+      if (err) throw err;
+      if (result.length > 0) {
+        let temp = result[0].manv.substring(result[0].manv.length - 1);
+        temp = parseInt(temp) + 1;
+        MANV = "nv" + temp;
+      } else {
+        MANV = "nv1";
+      }
+      conn.query(
+        `select nv.EMAIL from nhanvien nv
+            left join khachhang kh on kh.EMAIL = nv.EMAIL 
+             where nv.EMAIL = ?
+         `,
+        [EMAIL],
+        function (errEmail, resultEmail, fieldsEmail) {
+          if (errEmail) {
+            console.log(errEmail);
+          } 
+          if (resultEmail.length > 0) {
+            return res.json({status: 400, message: "Email đã tồn tại!!"})
+          }
+          conn.query(
+            `insert into nhanvien(MANV, HO, TEN, GIOITINH, NGAYSINH, SDT, EMAIL, DIACHI, PASSWORD, MANQ) VALUES (?,?,?,?,?,?,?,?,?,?)`,
+            [
+              MANV,
+              HO,
+              TEN,
+              GIOITINH,
+              NGAYSINH,
+              SDT,
+              EMAIL,
+              DIACHI,
+              PASSWORD,
+              MANQ,
+            ],
+            function (errCreate, resultCreate, fieldsCreate) {
+              if (errCreate) {
+                return next(new ErrorResponse(500, errCreate.sqlMessage));
+              }
+              return res.json({ status: 200, message: "Successfully!!" });
+            }
+          );
         }
       );
     }
-  });
+  );
 });
 
+router.post("/taikhoan-khachhang", function (req, res, next) {
+    let { HO, TEN, GIOITINH, NGAYSINH, SDT, EMAIL, DIACHI, PASSWORD } = req.body;   
+    let MANV = "";
+    const MANQ = "q1";
+    if (!isEmail(EMAIL)) {
+      return res.json({ status: 400, message:"Vui lòng nhập email hợp lệ!!(abc@gmail.com)" });
+    } else if (!validatePhoneNumber(SDT)) {
+      return res.json({ status: 300 , message: "Vui lòng nhập số điện thoại hợp lệ!! "});
+    }
+    conn.query(
+      "select max(makh) as makh from khachhang",
+      function (err, result, fields) {
+        if (err) throw err;
+        if (result.length > 0) {
+          let temp = result[0].manv.substring(result[0].manv.length - 1);
+          temp = parseInt(temp) + 1;
+          MANV = "kh" + temp;
+        } else {
+          MANV = "kh1";
+        }
+        conn.query(
+          `select nv.EMAIL from nhanvien nv
+              left join khachhang kh on kh.EMAIL = nv.EMAIL 
+               where nv.EMAIL = ?
+           `,
+          [EMAIL],
+          function (errEmail, resultEmail, fieldsEmail) {
+            if (errEmail) {
+              console.log(errEmail);
+            } 
+            if (resultEmail.length > 0) {
+              return res.json({status: 400, message: "Email đã tồn tại!!"})
+            }
+            conn.query(
+              `insert into khachhang(MANV, HO, TEN, GIOITINH, NGAYSINH, SDT, EMAIL, DIACHI, PASSWORD, MANQ) VALUES (?,?,?,?,?,?,?,?,?,?)`,
+              [
+                MANV,
+                HO,
+                TEN,
+                GIOITINH,
+                NGAYSINH,
+                SDT,
+                EMAIL,
+                DIACHI,
+                PASSWORD,
+                MANQ,
+              ],
+              function (errCreate, resultCreate, fieldsCreate) {
+                if (errCreate) {
+                  return next(new ErrorResponse(500, errCreate.sqlMessage));
+                }
+                return res.json({ status: 200, message: "Successfully!!" });
+              }
+            );
+          }
+        );
+      }
+    );
+  });
+  
 module.exports = router;
