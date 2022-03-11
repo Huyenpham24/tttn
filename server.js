@@ -25,7 +25,6 @@ app.use(cors());
 
 app.use('/', sanpham);
 app.use('/', theloai);
-console.log(1);
 app.use('/', taikhoan);
 // app.use('/', nhaxuatban);
 // // app.use('/', trangthai);
