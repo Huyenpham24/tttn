@@ -31,7 +31,7 @@ router.get('/spbanchay', function (req, res) {
 router.get('/sanpham/:MASACH', function (req, res, next) {
     let id = req.params.MASACH;
     if (id) {
-        query_string = "SELECT * FROM dausach, ct_gia, ct_sangtac, tacgia, nhaxuatban where dausach.MASACH = ct_gia.MASACH = ct_sangtac.MASACH AND ct_sangtac.MATG = tacgia.MATG AND dausach.MANXB = nhaxuatban.MANXB AND dausach.MASACH=" + "'"+ id + "'";
+        query_string = "SELECT * FROM dausach, ct_gia, ct_sangtac, tacgia, nhaxuatban, theloai where dausach.MATHELOAI = theloai.MATHELOAI AND dausach.MASACH = ct_gia.MASACH = ct_sangtac.MASACH AND ct_sangtac.MATG = tacgia.MATG AND dausach.MANXB = nhaxuatban.MANXB AND dausach.MASACH=" + "'"+ id + "'";
         conn.query(query_string, function (err, result, fields) {
             if (err) throw err;
             var [sp]= result;
@@ -78,9 +78,10 @@ router.post('/sanpham', function(req, res, next) {
             res.json({status: 500});
             return next(new ErrorResponse(500, `Wrong action`));
         }else{ 
-            var sql = `INSERT INTO dausach (MASACH, TENSACH,SOTRANG,SOLUONG,NAMXB,MATHELOAI,MANXB,TRANGTHAI,HINH1,HINH2) ct_gia (NGAY, GIATHAYDOI)
+            var sql = `INSERT INTO dausach (MASACH, TENSACH,SOTRANG,SOLUONG,NAMXB,MATHELOAI,MANXB,TRANGTHAI,HINH1,HINH2)
                              VALUES (${conn.escape(MASACH)}, ${conn.escape(TENSACH)}, ${conn.escape(SOTRANG)}, ${conn.escape(SOLUONG)}, ${conn.escape(NAMXB)}, ${conn.escape(MATHELOAI)}, ${conn.escape(MANXB)}, ${conn.escape(TRANGTHAI)}, ${conn.escape(HINH1)}, ${conn.escape(HINH2)},${conn.escape(NGAY)}, ${conn.escape(GIATHAYDOI)})`
-        }
+            var sql = `INSERT INTO ct_gia (MASACH, NGAY, GIATHAYDOI) VALUES (${conn.escape(MASACH)}, ${conn.escape(NGAY)}, ${conn.escape(GIATHAYDOI)})`
+                            }
         conn.query(sql, function(err, result) {
             if(err) throw err;
             res.json({status: 200});
@@ -114,7 +115,7 @@ router.delete('/sanpham/:MASACH', function(req, res, next) {
    {
        return next(new ErrorResponse(400, "không có MÃ sản phẩm"));
    }
-    conn.query('DELETE  FROM dausach WHERE MASACH=' + "'" + id + "'", function(err,result) {
+    conn.query('DELETE  FROM dausach, ct_gia WHERE dausach.MASACH = ct_gia.MASACH AND MASACH=' + "'" + id + "'", function(err,result) {
         if(err) 
         {
             return next(new ErrorResponse(500, err.sqlMessage));
