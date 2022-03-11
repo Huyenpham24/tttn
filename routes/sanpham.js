@@ -22,7 +22,14 @@ router.get('/sanphammoi', function (req, res) {
 });
 // sanpham noi bat
 router.get('/spbanchay', function (req, res) {
-    conn.query("SELECT SUM(ct_giohang.SOLUONG) as total, dausach.TENSACH, dausach.SOTRANG, dausach.HINH1, ct_gia.GIATHAYDOI, dausach.MATHELOAI FROM ct_giohang, dausach, ct_gia WHERE dausach.MASACH=ct_giohang.MASACH AND dausach.MASACH = ct_gia.MASACH AND IDGH in (SELECT IDGH FROM giohang WHERE giohang.TRANGTHAI=1 AND datediff(NOW(), giohang.NGAY) < 30) GROUP BY ct_giohang.MASACH ORDER BY total DESC LIMIT 4", function (err, result, fields) {
+    let newQuery = "SELECT SUM(ct.soluong) as total, ct.masach, ds.tensach, ds.sotrang, ds.hinh1, ctg.giathaydoi, tl.tentheloai  from ct_giohang ct ";
+    newQuery+=" left join giohang gh on gh.idgh = ct.idgh and gh.trangthai = 1"
+    newQuery+=" left join dausach ds on ct.masach = ds.masach"
+    newQuery+=" left join ct_gia ctg on ctg.masach = ct.masach"
+    newQuery+=" left join theloai tl on tl.matheloai = ds.matheloai"
+    newQuery+=" where DATEDIFF(NOW(),gh.NGAY) < 30"
+    newQuery+=" group by ct.masach order by total DESC LIMIT 3";
+    conn.query(newQuery, function (err, result, fields) {
         if (err) throw err;
         res.json(result);
     });
@@ -78,9 +85,9 @@ router.post('/sanpham', function(req, res, next) {
             res.json({status: 500});
             return next(new ErrorResponse(500, `Wrong action`));
         }else{ 
-            var sql = `INSERT INTO dausach (MASACH, TENSACH,SOTRANG,SOLUONG,NAMXB,MATHELOAI,MANXB,TRANGTHAI,HINH1,HINH2)
+            var sql = `INSERT INTO dausach (MASACH,TENSACH,SOTRANG,SOLUONG,NAMXB,MATHELOAI,MANXB,TRANGTHAI,HINH1,HINH2)
                              VALUES (${conn.escape(MASACH)}, ${conn.escape(TENSACH)}, ${conn.escape(SOTRANG)}, ${conn.escape(SOLUONG)}, ${conn.escape(NAMXB)}, ${conn.escape(MATHELOAI)}, ${conn.escape(MANXB)}, ${conn.escape(TRANGTHAI)}, ${conn.escape(HINH1)}, ${conn.escape(HINH2)},${conn.escape(NGAY)}, ${conn.escape(GIATHAYDOI)})`
-            var sql = `INSERT INTO ct_gia (MASACH, NGAY, GIATHAYDOI) VALUES (${conn.escape(MASACH)}, ${conn.escape(NGAY)}, ${conn.escape(GIATHAYDOI)})`
+            var sql = `INSERT INTO ct_gia (MASACH, NGAY, GIATHAYDOI) VALUES (${conn.escape(MASACH)},${conn.escape(NGAY)},${conn.escape(GIATHAYDOI)})`
                             }
         conn.query(sql, function(err, result) {
             if(err) throw err;
