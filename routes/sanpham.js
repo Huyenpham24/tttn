@@ -31,7 +31,7 @@ router.get('/spbanchay', function (req, res) {
 router.get('/sanpham/:MASACH', function (req, res, next) {
     let id = req.params.MASACH;
     if (id) {
-        query_string = "SELECT * FROM dausach, ct_gia, ct_sangtac, tacgia where dausach.MASACH = ct_gia.MASACH = ct_sangtac.MASACH AND ct_sangtac.MATG = tacgia.MATG AND dausach.MASACH=" + "'"+ id + "'";
+        query_string = "SELECT * FROM dausach, ct_gia, ct_sangtac, tacgia, nhaxuatban where dausach.MASACH = ct_gia.MASACH = ct_sangtac.MASACH AND ct_sangtac.MATG = tacgia.MATG AND dausach.MANXB = nhaxuatban.MANXB AND dausach.MASACH=" + "'"+ id + "'";
         conn.query(query_string, function (err, result, fields) {
             if (err) throw err;
             var [sp]= result;
@@ -70,7 +70,7 @@ router.get('/sanpham-theotheloai/:MASACH', function (req, res, next) {
 
 
 router.post('/sanpham', function(req, res, next) {
-    var {MASACH,TENSACH,SOTRANG,SOLUONG,NAMXB,MATHELOAI,MANXB,TRANGTHAI,HINH1,HINH2} = req.body;
+    var {MASACH,TENSACH,SOTRANG,SOLUONG,NAMXB,MATHELOAI,MANXB,TRANGTHAI,HINH1,HINH2,NGAY,GIATHAYDOI} = req.body;
     conn.query(`SELECT TENSACH FROM dausach WHERE TENSACH = ${conn.escape(TENSACH)}`, function (err, result, fields) {
         if (err) throw err;
         var [tt] = result;
@@ -78,8 +78,8 @@ router.post('/sanpham', function(req, res, next) {
             res.json({status: 500});
             return next(new ErrorResponse(500, `Wrong action`));
         }else{ 
-            var sql = `INSERT INTO dausach (MASACH, TENSACH,SOTRANG,SOLUONG,NAMXB,MATHELOAI,MANXB,TRANGTHAI,HINH1,HINH2) 
-                             VALUES (${conn.escape(MASACH)}, ${conn.escape(TENSACH)}, ${conn.escape(SOTRANG)}, ${conn.escape(SOLUONG)}, ${conn.escape(NAMXB)}, ${conn.escape(MATHELOAI)}, ${conn.escape(MANXB)}, ${conn.escape(TRANGTHAI)}, ${conn.escape(HINH1)}, ${conn.escape(HINH2)})`
+            var sql = `INSERT INTO dausach (MASACH, TENSACH,SOTRANG,SOLUONG,NAMXB,MATHELOAI,MANXB,TRANGTHAI,HINH1,HINH2) ct_gia (NGAY, GIATHAYDOI)
+                             VALUES (${conn.escape(MASACH)}, ${conn.escape(TENSACH)}, ${conn.escape(SOTRANG)}, ${conn.escape(SOLUONG)}, ${conn.escape(NAMXB)}, ${conn.escape(MATHELOAI)}, ${conn.escape(MANXB)}, ${conn.escape(TRANGTHAI)}, ${conn.escape(HINH1)}, ${conn.escape(HINH2)},${conn.escape(NGAY)}, ${conn.escape(GIATHAYDOI)})`
         }
         conn.query(sql, function(err, result) {
             if(err) throw err;
