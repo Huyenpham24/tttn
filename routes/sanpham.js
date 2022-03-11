@@ -50,7 +50,7 @@ router.get('/sanpham/:MASACH', function (req, res, next) {
 router.get('/sanpham-theotheloai/:MASACH', function (req, res, next) {
     let id = req.params.MASACH;
     if (id) {
-        query_string = "SELECT dausach.MASACH, dausach.TENSACH, dausach.SOTRANG, dausach.SOLUONG, dausach.NAMXB, dausach.MATHELOAI, dausach.MANXB, dausach.TRANGTHAI, dausach.HINH1, dausach.HINH2 FROM dausach, theloai where dausach.MATHELOAI = theloai.MATHELOAI AND theloai.MATHELOAI=" + "'"+ id +"'";
+        query_string = "SELECT dausach.MASACH, dausach.TENSACH, dausach.SOTRANG, dausach.SOLUONG, dausach.NAMXB, dausach.MATHELOAI, dausach.MANXB, dausach.TRANGTHAI, dausach.HINH1, dausach.HINH2, ct_gia.GIATHAYDOI FROM dausach, theloai, ct_gia where dausach.MATHELOAI = theloai.MATHELOAI AND dausach.MASACH = ct_gia.MASACH AND theloai.MATHELOAI=" + "'"+ id +"'";
         conn.query(query_string, function (err, result, fields) {
             if (err) {
                 res.json(err);
