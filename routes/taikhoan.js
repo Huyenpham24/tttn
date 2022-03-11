@@ -207,8 +207,6 @@ router.delete("/taikhoan/:id", function (req, res) {
 //Đăng nhập
 router.post("/dangnhap", function (req, res, next) {
   let { EMAIL, PASSWORD } = req.body;
-    console.log("EMAIL", EMAIL);
-    console.log("PASSWORD", PASSWORD);
   conn.query("SELECT EMAIL, PASSWORD, MANQ FROM khachhang WHERE EMAIL = ? AND PASSWORD = ?", [EMAIL, PASSWORD], function (err, result, fields) {
     if (err) throw err;
     if (result.length === 1) {
