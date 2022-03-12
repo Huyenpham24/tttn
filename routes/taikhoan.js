@@ -232,6 +232,34 @@ router.post("/dangnhap", function (req, res, next) {
   );
 });
 
+//lay thong tin
+router.get("/dangnhap/:EMAIL", function (req, res, next) {
+  let { EMAIL} = req.params;
+  conn.query(
+    "SELECT * FROM khachhang WHERE EMAIL = ?",
+    [EMAIL],
+    function (err, result, fields) {
+      if (err) throw err;
+      if (result.length === 1) {
+        res.json(result);
+      } else {
+        conn.query(
+          "SELECT * FROM nhanvien WHERE EMAIL = ?",
+          [EMAIL],
+          function (errNext, resultNext, fieldsNext) {
+            if (errNext) throw errNext;
+            if (resultNext.length === 1) {
+              res.json(resultNext);
+            } else {
+              return next(new ErrorResponse(404, `Wrong action`));
+            }
+          }
+        );
+      }
+    }
+  );
+});
+
 router.post("/taikhoan-nhanvien", function (req, res, next) {
   let { HO, TEN, GIOITINH, NGAYSINH, SDT, EMAIL, DIACHI } = req.body;
   const PASSWORD = "123456";
