@@ -13,10 +13,10 @@ router.get('/giohang', function(req, res) {
 });
 
 //get đơn và thông tin chi tiết đơn
-router.get('/giohang/:id', function (req, res, next) {
-    let id = req.params.id;
+router.get('/giohang/:IDGH', function (req, res, next) {
+    let id = req.params.IDGH;
     if (id) {
-        var sql = `SELECT *, giohang.SOLUONG as count FROM giohang , sanpham WHERE giohang.IDSP = sanpham.IDSP AND giohang.IDTK= + ${conn.escape(id)}`;
+        var sql = `SELECT ctgh.IDGH, ctgh.gia, ds.MASACH , ds.TENSACH, ds.TRANGTHAI, ds.HINH1, ctgh.SOLUONG as count FROM ct_giohang ctgh , dausach ds WHERE ctgh.MASACH = ds.MASACH AND ctgh.IDGH =+ ${conn.escape(id)}`;
         conn.query(sql, function (err, result, fields) {
             if (err) throw err;
             res.json(result);
@@ -30,12 +30,12 @@ router.get('/giohang/:id', function (req, res, next) {
 });
 
 //get đơn và thông tin chi tiết đơn
-router.get('/giohang/:idtk/:idsp', function (req, res, next) {
-    let idtk = req.params.idtk;
-    let idsp = req.params.idsp;
+router.get('/giohang/:MAKH/:MASACH', function (req, res, next) {
+    let idtk = req.params.MAKH;
+    let idsp = req.params.MASACH;
     if (idtk && idsp) {
-        var sql = `SELECT *, giohang.SOLUONG as count FROM giohang WHERE giohang.IDSP= +
-        ${conn.escape(idsp)} AND giohang.IDTK= + ${conn.escape(idtk)}`;
+        var sql = `SELECT ctgh.IDGH, ctgh.gia, ds.MASACH , ds.TENSACH, ds.TRANGTHAI, ds.HINH1, ctgh.SOLUONG as count FROM ct_giohang ctgh , dausach ds WHERE giohang.MASACH= +
+        ${conn.escape(idsp)} AND giohang.MAKH= + ${conn.escape(idtk)}`;
         conn.query(sql, function (err, result, fields) {
             if (err) throw err;
             res.json(result);
@@ -49,10 +49,10 @@ router.get('/giohang/:idtk/:idsp', function (req, res, next) {
 });
 
 router.post('/giohang', function(req, res) {
-    var {IDTK, IDSP, SOLUONG} = req.body;
+    var {MAKH, MASACH, SOLUONG} = req.body;
     conn.query(`
-    SELECT SOLUONG FROM giohang WHERE IDTK = ${conn.escape(IDTK)} AND IDSP = ${conn.escape(IDSP)}; 
-    SELECT SOLUONG FROM sanpham WHERE IDSP = ${conn.escape(IDSP)}`, function (err, result, fields) {
+    SELECT SOLUONG FROM ct_giohang, giohang WHERE MAKH = ${conn.escape(MAKH)} AND MASACH = ${conn.escape(MASACH)}; 
+    SELECT SOLUONG FROM dausach WHERE MASACH = ${conn.escape(MASACH)}`, function (err, result, fields) {
         if (err) throw err;
         var [[gh], [sp]] = result;
         if((gh?.SOLUONG || 0) + SOLUONG <= sp.SOLUONG){

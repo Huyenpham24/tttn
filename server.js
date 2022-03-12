@@ -13,7 +13,7 @@ var taikhoan = require('./routes/taikhoan');
 var quyen = require('./routes/quyen');
 // var donhang = require('./routes/donhang');
 // var ctdh = require('./routes/ctdonhang');
-// var giohang = require('./routes/giohang');
+var giohang = require('./routes/giohang');
 
 // var connection = require('./Dbconnection');
 
@@ -35,7 +35,7 @@ app.use('/', taikhoan);
 app.use('/', quyen);
 // app.use('/', donhang);
 // app.use('/', ctdh);
-// app.use('/', giohang);
+app.use('/', giohang);
 
 var server = app.listen(2000, function () {
     console.log('Server listening on port ' + server.address().port);
